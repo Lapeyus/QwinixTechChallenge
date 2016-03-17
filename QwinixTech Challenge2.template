@@ -1,0 +1,341 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Qwinix Tech Challenge",
+  "Parameters": {
+    "InstanceType": {
+      "Description": "Choose your instance type",
+      "Type": "String",
+      "Default": "t1.micro",
+      "AllowedValues": [
+        "t1.micro",
+        "t2.micro",
+        "m1.small",
+        "m1.medium",
+        "m1.large",
+        "m3.medium",
+        "m3.large",
+        "m3.xlarge",
+        "m3.2xlarge",
+        "c1.medium",
+        "r3.large"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 instance type"
+    }
+  },
+  "Mappings": {
+    "AWSInstanceType2Arch": {
+      "t1.micro": {
+        "Arch": "PV64"
+      },
+      "t2.micro": {
+        "Arch": "HVM64"
+      },
+      "m1.small": {
+        "Arch": "PV64"
+      },
+      "m1.medium": {
+        "Arch": "PV64"
+      },
+      "m1.large": {
+        "Arch": "PV64"
+      },
+      "m3.medium": {
+        "Arch": "HVM64"
+      },
+      "m3.large": {
+        "Arch": "HVM64"
+      },
+      "m3.xlarge": {
+        "Arch": "HVM64"
+      },
+      "m3.2xlarge": {
+        "Arch": "HVM64"
+      },
+      "c1.medium": {
+        "Arch": "PV64"
+      },
+      "r3.large": {
+        "Arch": "HVM64"
+      }
+    },
+    "AWSRegionArch2AMI": {
+      "us-east-1": {
+        "PV64": "ami-50842d38",
+        "HVM64": "ami-08842d60",
+        "HVMG2": "ami-3a329952"
+      },
+      "us-west-2": {
+        "PV64": "ami-af86c69f",
+        "HVM64": "ami-8786c6b7",
+        "HVMG2": "ami-47296a77"
+      },
+      "us-west-1": {
+        "PV64": "ami-c7a8a182",
+        "HVM64": "ami-cfa8a18a",
+        "HVMG2": "ami-331b1376"
+      },
+      "eu-west-1": {
+        "PV64": "ami-aa8f28dd",
+        "HVM64": "ami-748e2903",
+        "HVMG2": "ami-00913777"
+      },
+      "ap-southeast-1": {
+        "PV64": "ami-20e1c572",
+        "HVM64": "ami-d6e1c584",
+        "HVMG2": "ami-fabe9aa8"
+      },
+      "ap-northeast-1": {
+        "PV64": "ami-21072820",
+        "HVM64": "ami-35072834",
+        "HVMG2": "ami-5dd1ff5c"
+      },
+      "ap-southeast-2": {
+        "PV64": "ami-8b4724b1",
+        "HVM64": "ami-fd4724c7",
+        "HVMG2": "ami-e98ae9d3"
+      },
+      "sa-east-1": {
+        "PV64": "ami-9d6cc680",
+        "HVM64": "ami-956cc688",
+        "HVMG2": "NOT_SUPPORTED"
+      },
+      "cn-north-1": {
+        "PV64": "ami-a857c591",
+        "HVM64": "ami-ac57c595",
+        "HVMG2": "NOT_SUPPORTED"
+      },
+      "eu-central-1": {
+        "PV64": "ami-a03503bd",
+        "HVM64": "ami-b43503a9",
+        "HVMG2": "ami-b03503ad"
+      }
+    }
+  },
+  "Resources": {
+    "joseph_test": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebServerSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "aprivatesubnet"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
+        }
+      }
+    },
+    "WebServerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access via port 80",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "8080",
+            "ToPort": "8080",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        }
+      }
+    },
+    "joseph_test2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebServerSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "aprivatesubnet"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
+        }
+      }
+    },
+    "joseph_test3": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebServerSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "aprivatesubnet"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5e4f9466-64c2-4dae-98aa-6f839c7b17f2"
+        }
+      }
+    },
+    "aprivatesubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "WebsiteURL": {
+      "Description": "URL for newly created stack",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "WebServerInstance",
+                "PublicDnsName"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "d2e00f22-aadc-4fab-ac21-45f5730a1f77": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 40,
+          "y": 160
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "ce9c849e-0ada-40a3-83d5-febde8fddfaf": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 170,
+          "y": 50
+        },
+        "z": 1,
+        "embeds": [],
+        "ismemberof": [
+          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        ]
+      },
+      "aed382cf-8610-4e30-8e1d-6cc419c33f92": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 70,
+          "y": 50
+        },
+        "z": 1,
+        "embeds": [],
+        "ismemberof": [
+          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        ]
+      },
+      "7db7034a-c7d9-4779-888f-c90bda1cc05d": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -220,
+          "y": 60
+        },
+        "z": 1,
+        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
+        "embeds": [],
+        "ismemberof": [
+          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        ]
+      },
+      "7f149386-c97f-4229-bbfa-dcf392951cea": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -358.7194813915996,
+          "y": 92.50055082189951
+        },
+        "z": 1,
+        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
+        "embeds": [],
+        "ismemberof": [
+          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        ]
+      },
+      "e07aa75e-c147-4611-87e0-1706120e123b": {
+        "source": {
+          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
+        },
+        "target": {
+          "id": "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        },
+        "z": 2
+      },
+      "5e4f9466-64c2-4dae-98aa-6f839c7b17f2": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -328.7194813915996,
+          "y": 122.50055082189951
+        },
+        "z": 1,
+        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
+        "embeds": [],
+        "ismemberof": [
+          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+        ]
+      },
+      "534bcf3e-9d65-454f-9738-1867135f423a": {
+        "size": {
+          "width": 260,
+          "height": 150
+        },
+        "position": {
+          "x": -380,
+          "y": 50
+        },
+        "z": 0,
+        "embeds": [
+          "7f149386-c97f-4229-bbfa-dcf392951cea",
+          "5e4f9466-64c2-4dae-98aa-6f839c7b17f2",
+          "7db7034a-c7d9-4779-888f-c90bda1cc05d"
+        ]
+      }
+    }
+  }
+}
