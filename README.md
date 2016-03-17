@@ -19,5 +19,4 @@ This section gives a text description and creates the list of the instance types
       "ConstraintDescription": "Must be a valid EC2 instance type"
     }
   }
-
- </code>
+ 
