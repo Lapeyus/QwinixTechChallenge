@@ -8,6 +8,10 @@ A single cloud formation template containing the described features stored in a 
 
 
 This section gives a text description and creates the list of the instance types to the initiator of the stack, this way is able to specify the type of instance when the template is run from the given list.
+ 
+ 
+ <code>A piece of computer code</code>
+ 
  <code>
  Description": "Qwinix Tech Challenge",
   "Parameters": {
@@ -19,4 +23,4 @@ This section gives a text description and creates the list of the instance types
       "ConstraintDescription": "Must be a valid EC2 instance type"
     }
   }
- 
+ </code>
