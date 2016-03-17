@@ -9,7 +9,7 @@ This challenge requires you to write a Cloudformation template that can be used 
     The stack should initiate 3 EC2 instances. 
     The stack should maintain 3 instances running at any given time. 
     The initiator of the stack should be able to specify the type of instance when the template is run from a list of the following:
-                t1.micro
+                <code>t1.micro
                 t2.micro
                 m1.small
                 m1.medium
@@ -20,7 +20,7 @@ This challenge requires you to write a Cloudformation template that can be used 
                 m3.2xlarge
                 c1.medium
                 r3.large
-
+<code>
     The instances should each be spawned in a different availability zone inside a private subnet. 
     The ec2 instances should be configured with a security group that only allows the website traffic and ssh
     The ec2 instances should be configured with apache listening on port 8080. 
