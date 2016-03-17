@@ -112,24 +112,6 @@
     }
   },
   "Resources": {
-    "joseph_test": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "WebServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "aprivatesubnet"
-        }
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
-        }
-      }
-    },
     "WebServerSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -154,25 +136,37 @@
         }
       }
     },
-    "joseph_test2": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "WebServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "aprivatesubnet"
-        }
-      },
+    "aprivatesubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {},
       "Metadata": {
         "AWS::CloudFormation::Designer": {
-          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
+          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
         }
       }
     },
-    "joseph_test3": {
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "Instances": [
+          {
+            "Ref": "josephtest"
+          },
+          {
+            "Ref": "josephtest3"
+          },
+          {
+            "Ref": "josephtest2"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
+        }
+      }
+    },
+    "josephtest3": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "SecurityGroupIds": [
@@ -190,33 +184,39 @@
         }
       }
     },
-    "aprivatesubnet": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {},
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
-        }
-      }
-    },
-    "ElasticLoadBalancer": {
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+    "josephtest2": {
+      "Type": "AWS::EC2::Instance",
       "Properties": {
-        "Instances": [
+        "SecurityGroupIds": [
           {
-            "Ref": "joseph_test"
-          },
-          {
-            "Ref": "joseph_test3"
-          },
-          {
-            "Ref": "joseph_test2"
+            "Ref": "WebServerSecurityGroup"
           }
-        ]
+        ],
+        "SubnetId": {
+          "Ref": "aprivatesubnet"
+        }
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
-          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
+          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
+        }
+      }
+    },
+    "josephtest": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "SecurityGroupIds": [
+          {
+            "Ref": "WebServerSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "aprivatesubnet"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
         }
       }
     }
@@ -231,7 +231,7 @@
             "http://",
             {
               "Fn::GetAtt": [
-                "WebServerInstance",
+                "josephtest",
                 "PublicDnsName"
               ]
             }
@@ -367,6 +367,7 @@
           "y": 170
         },
         "z": 0,
+        "embeds": [],
         "isconnectedto": [
           "7db7034a-c7d9-4779-888f-c90bda1cc05d",
           "5e4f9466-64c2-4dae-98aa-6f839c7b17f2",
