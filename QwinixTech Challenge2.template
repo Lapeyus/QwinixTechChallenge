@@ -115,7 +115,7 @@
     "WebServerSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "Enable HTTP access via port 80",
+        "GroupDescription": "Enable HTTP access via port 8080",
         "SecurityGroupIngress": [
           {
             "IpProtocol": "tcp",
@@ -217,6 +217,34 @@
       "Metadata": {
         "AWS::CloudFormation::Designer": {
           "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
+        }
+      }
+    },
+    "ASASG5AZE9": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "aprivatesubnet"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+        }
+      }
+    },
+    "ASSP13GXS": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AutoScalingGroupName": {
+          "Ref": "ASASG5AZE9"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "4bfec67f-7183-497c-b9df-09515b9110da"
         }
       }
     }
@@ -343,18 +371,18 @@
       },
       "534bcf3e-9d65-454f-9738-1867135f423a": {
         "size": {
-          "width": 490,
-          "height": 160
+          "width": 520,
+          "height": 150
         },
         "position": {
-          "x": -580,
-          "y": -10
+          "x": -610,
+          "y": 0
         },
         "z": 0,
         "embeds": [
-          "5e4f9466-64c2-4dae-98aa-6f839c7b17f2",
+          "7db7034a-c7d9-4779-888f-c90bda1cc05d",
           "7f149386-c97f-4229-bbfa-dcf392951cea",
-          "7db7034a-c7d9-4779-888f-c90bda1cc05d"
+          "5e4f9466-64c2-4dae-98aa-6f839c7b17f2"
         ]
       },
       "5cc7cd81-d718-43c7-b1e5-66966a70a88a": {
@@ -400,6 +428,63 @@
           "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
         },
         "z": 4
+      },
+      "061fe939-6a7b-4a4e-9852-9d499d17bcea": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -710,
+          "y": 40
+        },
+        "z": 0,
+        "isconnectedto": [
+          "534bcf3e-9d65-454f-9738-1867135f423a"
+        ]
+      },
+      "d07c2d83-5016-4a45-bb6d-e6493e75ff43": {
+        "source": {
+          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+        },
+        "target": {
+          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
+        },
+        "z": 2
+      },
+      "dd822cc0-40f4-44e8-b461-1955bd1d55c7": {
+        "source": {
+          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea",
+          "selector": "g:nth-child(1) g:nth-child(4) g:nth-child(2) circle:nth-child(1)     ",
+          "port": "AWS::RefLink-AWS::EC2::Subnet-VPCZoneIdentifier"
+        },
+        "target": {
+          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
+        },
+        "z": 4
+      },
+      "4bfec67f-7183-497c-b9df-09515b9110da": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -710,
+          "y": -40
+        },
+        "z": 0,
+        "isassociatedwith": [
+          "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+        ]
+      },
+      "9ef4e6b2-7c05-4be7-a167-a507d147684b": {
+        "source": {
+          "id": "4bfec67f-7183-497c-b9df-09515b9110da"
+        },
+        "target": {
+          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+        },
+        "z": 3
       }
     }
   }
