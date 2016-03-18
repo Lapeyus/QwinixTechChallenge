@@ -18,7 +18,7 @@ A single cloud formation template containing the described features stored in a 
     }
   },
   </code>
-The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup
+<br><p>The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup</p>
 <code>
 "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
