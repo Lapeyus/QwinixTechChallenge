@@ -6,7 +6,7 @@ A single cloud formation template containing the described features stored in a 
 <h2>Description:</h2>
 <p>This challenge requires you to write a Cloudformation template that can be used to provision AWS services using automation. If you are not familiar with Cloudformation, you can search the Internet where there is a lot of information available from AWS about it. The CloudFormation template should be made available for review on github with full history of changes and commits using the master branch.</p>
 
-
+<code>
  "Parameters": {
     "InstanceType": {
       "Description": "EC2 instance type",
@@ -17,7 +17,9 @@ A single cloud formation template containing the described features stored in a 
       "ConstraintDescription": "must be a valid EC2 instance type."
     }
   },
+  </code>
 The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup
+<code>
 "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
@@ -51,4 +53,4 @@ The stack should maintain 3 instances running at any given time.
       },
       }
     },
-
+  </code>
