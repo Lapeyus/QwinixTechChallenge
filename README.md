@@ -92,5 +92,61 @@ A single cloud formation template containing the described features stored in a 
     },
 </code>
 <h3>The ec2 instances should be configured with apache listening on port 8080.</h3> 
+<code>
+"LaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata": {
+        "Comment1": "Configure the bootstrap helpers to install the Apache Web Server and PHP",
+        "Comment2": "The website content is created",
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+                "httpd": [],
+                "php": [],
+                "php-mysql": []
+              }
+            },
+                </code>
 <h3>The webserver must display “Hello World” when the website is accessed on the ec2 instance</h3>
+<code>
+            "files": {
+              "/var/www/html/index.php": {
+                "content": {
+                  "Fn::Join": [
+                    "", [
+                      "<html>\n",
+                      "  <head>\n",
+                      "    <title>Qwinix Tech Challenge</title>\n",
+                      "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n",
+                      "  </head>\n",
+                      "  <body>\n",
+                      "    <h1>Hello world?</h1>\n",
+                      "  </body>\n",
+                      "</html>\n"
+                    ]
+                  ]
+                },
+</code>
 <h3>The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80.</h3>
+<code>
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "CrossZone": "true",
+        "AvailabilityZones": {
+          "Fn::GetAZs": ""
+        },
+        "LBCookieStickinessPolicy": [{
+          "PolicyName": "CookieBasedPolicy",
+          "CookieExpirationPeriod": "30"
+        }],
+        "Listeners": [{
+          "LoadBalancerPort": "80",
+          "InstancePort": "80",
+          "Protocol": "HTTP",
+          "PolicyNames": [
+            "CookieBasedPolicy"
+          ]
+        }],
+</code>
