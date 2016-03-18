@@ -56,6 +56,41 @@ A single cloud formation template containing the described features stored in a 
   </code>
 
 <h3>The ec2 instances should be configured with a security group that only allows the website traffic and ssh	</h3>
+<code>
+"WebServerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access via port 80 locked down to the ELB and SSH access",
+        "SecurityGroupIngress": [{
+          "IpProtocol": "tcp",
+          "FromPort": "80",
+          "ToPort": "80",
+          "SourceSecurityGroupOwnerId": {
+            "Fn::GetAtt": [
+              "ElasticLoadBalancer",
+              "SourceSecurityGroup.OwnerAlias"
+            ]
+          },
+          "SourceSecurityGroupName": {
+            "Fn::GetAtt": [
+              "ElasticLoadBalancer",
+              "SourceSecurityGroup.GroupName"
+            ]
+          }
+        }, {
+          "IpProtocol": "tcp",
+          "FromPort": "22",
+          "ToPort": "22",
+          "CidrIp": "0.0.0.0/0"
+        }]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "914d06dc-c71a-4470-bb25-b9e6763dc6db"
+        }
+      }
+    },
+</code>
 <h3>The ec2 instances should be configured with apache listening on port 8080.</h3> 
 <h3>The webserver must display “Hello World” when the website is accessed on the ec2 instance</h3>
 <h3>The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80.</h3>
