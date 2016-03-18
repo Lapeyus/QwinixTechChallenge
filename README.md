@@ -18,7 +18,7 @@ A single cloud formation template containing the described features stored in a 
     }
   },
   </code>
-<br><p>The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup</p>
+<h3>The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup</h3>
 <code>
 "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -42,7 +42,7 @@ A single cloud formation template containing the described features stored in a 
           "Count": "3"
         }
       },
-The stack should maintain 3 instances running at any given time. 
+<h3>The stack should maintain 3 instances running at any given time</h3>. 
       "UpdatePolicy": {
         "AutoScalingRollingUpdate": {
           "MinInstancesInService": "3",
@@ -54,3 +54,8 @@ The stack should maintain 3 instances running at any given time.
       }
     },
   </code>
+
+<h3>The ec2 instances should be configured with a security group that only allows the website traffic and ssh	</h3>
+<h3>The ec2 instances should be configured with apache listening on port 8080.</h3> 
+<h3>The webserver must display “Hello World” when the website is accessed on the ec2 instance</h3>
+<h3>The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80.</h3>
