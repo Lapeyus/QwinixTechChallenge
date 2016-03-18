@@ -2,8 +2,9 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Qwinix Tech Challenge",
   "Parameters": {
+
     "InstanceType": {
-      "Description": "Choose your instance type",
+      "Description": "EC2 instance type",
       "Type": "String",
       "Default": "t1.micro",
       "AllowedValues": [
@@ -19,7 +20,7 @@
         "c1.medium",
         "r3.large"
       ],
-      "ConstraintDescription": "Must be a valid EC2 instance type"
+      "ConstraintDescription": "must be a valid EC2 instance type."
     }
   },
   "Mappings": {
@@ -111,156 +112,375 @@
       }
     }
   },
-  "Resources": {
-    "WebServerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enable HTTP access via port 8080",
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "8080",
-            "ToPort": "8080",
-            "CidrIp": "0.0.0.0/0"
+  "Conditions": {
+    "Is-EC2-VPC": {
+      "Fn::Or": [{
+        "Fn::Equals": [{
+            "Ref": "AWS::Region"
           },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22"
-          }
+          "eu-central-1"
         ]
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
-        }
-      }
+      }, {
+        "Fn::Equals": [{
+            "Ref": "AWS::Region"
+          },
+          "cn-north-1"
+        ]
+      }, {
+        "Fn::Equals": [{
+            "Ref": "AWS::Region"
+          },
+          "ap-northeast-2"
+        ]
+      }]
     },
-    "aprivatesubnet": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {},
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
-        }
-      }
-    },
+    "Is-EC2-Classic": {
+      "Fn::Not": [{
+        "Condition": "Is-EC2-VPC"
+      }]
+    }
+  },
+  "Resources": {
     "ElasticLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties": {
-        "Instances": [
-          {
-            "Ref": "josephtest"
-          },
-          {
-            "Ref": "josephtest3"
-          },
-          {
-            "Ref": "josephtest2"
-          }
-        ]
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
-        }
-      }
-    },
-    "josephtest3": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "WebServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "aprivatesubnet"
+        "CrossZone": "true",
+        "AvailabilityZones": {
+          "Fn::GetAZs": ""
+        },
+        "LBCookieStickinessPolicy": [{
+          "PolicyName": "CookieBasedPolicy",
+          "CookieExpirationPeriod": "30"
+        }],
+        "Listeners": [{
+          "LoadBalancerPort": "80",
+          "InstancePort": "80",
+          "Protocol": "HTTP",
+          "PolicyNames": [
+            "CookieBasedPolicy"
+          ]
+        }],
+        "HealthCheck": {
+          "Target": "HTTP:80/",
+          "HealthyThreshold": "2",
+          "UnhealthyThreshold": "5",
+          "Interval": "10",
+          "Timeout": "5"
         }
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
-          "id": "5e4f9466-64c2-4dae-98aa-6f839c7b17f2"
+          "id": "f3e12dae-10f9-4568-9071-ce928a025906"
         }
       }
     },
-    "josephtest2": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "WebServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "aprivatesubnet"
-        }
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
-        }
-      }
-    },
-    "josephtest": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "SecurityGroupIds": [
-          {
-            "Ref": "WebServerSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "aprivatesubnet"
-        }
-      },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
-        }
-      }
-    },
-    "ASASG5AZE9": {
+    "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
-        "VPCZoneIdentifier": [
-          {
-            "Ref": "aprivatesubnet"
-          }
-        ]
+        "AvailabilityZones": {
+          "Fn::GetAZs": ""
+        },
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "MinSize": "3",
+        "MaxSize": "4",
+        "DesiredCapacity": "3",
+        "LoadBalancerNames": [{
+          "Ref": "ElasticLoadBalancer"
+        }]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT5M",
+          "Count": "3"
+        }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime": "PT15M",
+          "WaitOnResourceSignals": "true"
+        }
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
-          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+          "id": "b0f32149-1c22-4a1a-8050-1afa73f4d2b4"
         }
       }
     },
-    "ASSP13GXS": {
-      "Type": "AWS::AutoScaling::ScalingPolicy",
+    "LaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata": {
+        "Comment1": "Configure the bootstrap helpers to install the Apache Web Server and PHP",
+        "Comment2": "The website content is downloaded from the CloudFormationPHPSample.zip file",
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "yum": {
+                "httpd": [],
+                "php": [],
+                "php-mysql": []
+              }
+            },
+            "files": {
+              "/var/www/html/index.php": {
+                "content": {
+                  "Fn::Join": [
+                    "", [
+                      "<html>\n",
+                      "  <head>\n",
+                      "    <title>Qwinix Tech Challenge</title>\n",
+                      "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n",
+                      "  </head>\n",
+                      "  <body>\n",
+                      "    <h1>Hello world?</h1>\n",
+                      "  </body>\n",
+                      "</html>\n"
+                    ]
+                  ]
+                },
+                "mode": "000600",
+                "owner": "apache",
+                "group": "apache"
+              },
+              "/etc/cfn/cfn-hup.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "", [
+                      "[main]\n",
+                      "stack=", {
+                        "Ref": "AWS::StackId"
+                      },
+                      "\n",
+                      "region=", {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n"
+                    ]
+                  ]
+                },
+                "mode": "000400",
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "", [
+                      "[cfn-auto-reloader-hook]\n",
+                      "triggers=post.update\n",
+                      "path=Resources.LaunchConfig.Metadata.AWS::CloudFormation::Init\n",
+                      "action=/opt/aws/bin/cfn-init -v ",
+                      "         --stack ", {
+                        "Ref": "AWS::StackName"
+                      },
+                      "         --resource LaunchConfig ",
+                      "         --region ", {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n",
+                      "runas=root\n"
+                    ]
+                  ]
+                }
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "httpd": {
+                  "enabled": "true",
+                  "ensureRunning": "true"
+                },
+                "cfn-hup": {
+                  "enabled": "true",
+                  "ensureRunning": "true",
+                  "files": [
+                    "/etc/cfn/cfn-hup.conf",
+                    "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "AWS::CloudFormation::Designer": {
+          "id": "0f63267e-d82b-4937-b049-40823fdea465"
+        }
+      },
       "Properties": {
-        "AutoScalingGroupName": {
-          "Ref": "ASASG5AZE9"
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSRegionArch2AMI", {
+              "Ref": "AWS::Region"
+            }, {
+              "Fn::FindInMap": [
+                "AWSInstanceType2Arch", {
+                  "Ref": "InstanceType"
+                },
+                "Arch"
+              ]
+            }
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroups": [{
+          "Ref": "WebServerSecurityGroup"
+        }],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "", [
+                "#!/bin/bash -xe\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "# Install the files and packages from the metadata\n",
+                "/opt/aws/bin/cfn-init -v ",
+                "         --stack ", {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource LaunchConfig ",
+                "         --region ", {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "         --stack ", {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource WebServerGroup ",
+                "         --region ", {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "WebServerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access via port 80 locked down to the ELB and SSH access",
+        "SecurityGroupIngress": [{
+          "IpProtocol": "tcp",
+          "FromPort": "80",
+          "ToPort": "80",
+          "SourceSecurityGroupOwnerId": {
+            "Fn::GetAtt": [
+              "ElasticLoadBalancer",
+              "SourceSecurityGroup.OwnerAlias"
+            ]
+          },
+          "SourceSecurityGroupName": {
+            "Fn::GetAtt": [
+              "ElasticLoadBalancer",
+              "SourceSecurityGroup.GroupName"
+            ]
+          }
+        }, {
+          "IpProtocol": "tcp",
+          "FromPort": "22",
+          "ToPort": "22",
+          "CidrIp": "0.0.0.0/0"
+        }]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "914d06dc-c71a-4470-bb25-b9e6763dc6db"
+        }
+      }
+    },
+    "DBEC2SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Condition": "Is-EC2-VPC",
+      "Properties": {
+        "GroupDescription": "Open database for access",
+        "SecurityGroupIngress": [{
+          "IpProtocol": "tcp",
+          "FromPort": "3306",
+          "ToPort": "3306",
+          "SourceSecurityGroupName": {
+            "Ref": "WebServerSecurityGroup"
+          }
+        }]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "eea79b4c-1d3d-4cc5-b043-88f620a94045"
+        }
+      }
+    },
+    "DBSecurityGroup": {
+      "Type": "AWS::RDS::DBSecurityGroup",
+      "Condition": "Is-EC2-Classic",
+      "Properties": {
+        "DBSecurityGroupIngress": {
+          "EC2SecurityGroupName": {
+            "Ref": "WebServerSecurityGroup"
+          }
+        },
+        "GroupDescription": "database access"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "615715d6-7362-4ab1-a3ed-a462a20196bc"
+        }
+      }
+    },
+    "MySQLDatabase": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "Engine": "MySQL",
+        "DBName": "DBName",
+        "MultiAZ": "true",
+        "MasterUsername": "DBUser",
+        "MasterUserPassword": "DBPassword1",
+        "DBInstanceClass": "db.t2.small",
+        "AllocatedStorage": "5",
+        "VPCSecurityGroups": {
+          "Fn::If": [
+            "Is-EC2-VPC", [{
+              "Fn::GetAtt": [
+                "DBEC2SecurityGroup",
+                "GroupId"
+              ]
+            }], {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "DBSecurityGroups": {
+          "Fn::If": [
+            "Is-EC2-Classic", [{
+              "Ref": "DBSecurityGroup"
+            }], {
+              "Ref": "AWS::NoValue"
+            }
+          ]
         }
       },
       "Metadata": {
         "AWS::CloudFormation::Designer": {
-          "id": "4bfec67f-7183-497c-b9df-09515b9110da"
+          "id": "9cddbb54-0bb3-4f46-848c-6737907fad75"
         }
       }
     }
   },
   "Outputs": {
     "WebsiteURL": {
-      "Description": "URL for newly created stack",
+      "Description": "URL for newly created LAMP stack",
       "Value": {
         "Fn::Join": [
-          "",
-          [
-            "http://",
-            {
+          "", [
+            "http://", {
               "Fn::GetAtt": [
-                "josephtest",
-                "PublicDnsName"
+                "ElasticLoadBalancer",
+                "DNSName"
               ]
             }
           ]
@@ -270,221 +490,113 @@
   },
   "Metadata": {
     "AWS::CloudFormation::Designer": {
-      "d2e00f22-aadc-4fab-ac21-45f5730a1f77": {
+      "f3e12dae-10f9-4568-9071-ce928a025906": {
         "size": {
           "width": 60,
           "height": 60
         },
         "position": {
-          "x": -380,
-          "y": -80
+          "x": 160,
+          "y": 200
         },
         "z": 1,
         "embeds": []
       },
-      "ce9c849e-0ada-40a3-83d5-febde8fddfaf": {
+      "914d06dc-c71a-4470-bb25-b9e6763dc6db": {
         "size": {
           "width": 60,
           "height": 60
         },
         "position": {
-          "x": 170,
-          "y": 50
+          "x": 10,
+          "y": 160
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "f3e12dae-10f9-4568-9071-ce928a025906"
+        ]
+      },
+      "615715d6-7362-4ab1-a3ed-a462a20196bc": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -110,
+          "y": 200
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "914d06dc-c71a-4470-bb25-b9e6763dc6db"
+        ]
+      },
+      "eea79b4c-1d3d-4cc5-b043-88f620a94045": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -170,
+          "y": 120
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "914d06dc-c71a-4470-bb25-b9e6763dc6db"
+        ]
+      },
+      "9cddbb54-0bb3-4f46-848c-6737907fad75": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -240,
+          "y": 200
         },
         "z": 1,
         "embeds": [],
         "ismemberof": [
-          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+          "615715d6-7362-4ab1-a3ed-a462a20196bc"
+        ],
+        "isrelatedto": [
+          "eea79b4c-1d3d-4cc5-b043-88f620a94045"
         ]
       },
-      "aed382cf-8610-4e30-8e1d-6cc419c33f92": {
+      "0f63267e-d82b-4937-b049-40823fdea465": {
         "size": {
           "width": 60,
           "height": 60
         },
         "position": {
-          "x": 70,
-          "y": 50
+          "x": 370,
+          "y": 130
         },
         "z": 1,
         "embeds": [],
         "ismemberof": [
-          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
+          "914d06dc-c71a-4470-bb25-b9e6763dc6db"
         ]
       },
-      "7db7034a-c7d9-4779-888f-c90bda1cc05d": {
+      "b0f32149-1c22-4a1a-8050-1afa73f4d2b4": {
         "size": {
           "width": 60,
           "height": 60
         },
         "position": {
-          "x": -230,
-          "y": 50
+          "x": 280,
+          "y": 200
         },
         "z": 1,
-        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
-        "embeds": [],
-        "ismemberof": [
-          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
-        ]
-      },
-      "7f149386-c97f-4229-bbfa-dcf392951cea": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -540,
-          "y": 50
-        },
-        "z": 1,
-        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
-        "embeds": [],
-        "ismemberof": [
-          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
-        ]
-      },
-      "e07aa75e-c147-4611-87e0-1706120e123b": {
-        "source": {
-          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
-        },
-        "target": {
-          "id": "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
-        },
-        "z": 2
-      },
-      "5e4f9466-64c2-4dae-98aa-6f839c7b17f2": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -380,
-          "y": 50
-        },
-        "z": 1,
-        "parent": "534bcf3e-9d65-454f-9738-1867135f423a",
-        "embeds": [],
-        "ismemberof": [
-          "d2e00f22-aadc-4fab-ac21-45f5730a1f77"
-        ]
-      },
-      "534bcf3e-9d65-454f-9738-1867135f423a": {
-        "size": {
-          "width": 520,
-          "height": 150
-        },
-        "position": {
-          "x": -610,
-          "y": 0
-        },
-        "z": 0,
-        "embeds": [
-          "7db7034a-c7d9-4779-888f-c90bda1cc05d",
-          "7f149386-c97f-4229-bbfa-dcf392951cea",
-          "5e4f9466-64c2-4dae-98aa-6f839c7b17f2"
-        ]
-      },
-      "5cc7cd81-d718-43c7-b1e5-66966a70a88a": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -380,
-          "y": 170
-        },
-        "z": 0,
         "embeds": [],
         "isconnectedto": [
-          "7db7034a-c7d9-4779-888f-c90bda1cc05d",
-          "5e4f9466-64c2-4dae-98aa-6f839c7b17f2",
-          "7f149386-c97f-4229-bbfa-dcf392951cea"
-        ]
-      },
-      "af685ed1-32b9-4257-9616-ee436dd6baf1": {
-        "source": {
-          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
-        },
-        "target": {
-          "id": "7db7034a-c7d9-4779-888f-c90bda1cc05d"
-        },
-        "z": 2
-      },
-      "85d1e86c-6ab1-409d-ba8e-d8e68dc1cef9": {
-        "source": {
-          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
-        },
-        "target": {
-          "id": "5e4f9466-64c2-4dae-98aa-6f839c7b17f2"
-        },
-        "z": 3
-      },
-      "a67ae6a4-da59-4778-91d5-538c9abfd58d": {
-        "source": {
-          "id": "5cc7cd81-d718-43c7-b1e5-66966a70a88a"
-        },
-        "target": {
-          "id": "7f149386-c97f-4229-bbfa-dcf392951cea"
-        },
-        "z": 4
-      },
-      "061fe939-6a7b-4a4e-9852-9d499d17bcea": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -710,
-          "y": 40
-        },
-        "z": 0,
-        "isconnectedto": [
-          "534bcf3e-9d65-454f-9738-1867135f423a"
-        ]
-      },
-      "d07c2d83-5016-4a45-bb6d-e6493e75ff43": {
-        "source": {
-          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
-        },
-        "target": {
-          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
-        },
-        "z": 2
-      },
-      "dd822cc0-40f4-44e8-b461-1955bd1d55c7": {
-        "source": {
-          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea",
-          "selector": "g:nth-child(1) g:nth-child(4) g:nth-child(2) circle:nth-child(1)     ",
-          "port": "AWS::RefLink-AWS::EC2::Subnet-VPCZoneIdentifier"
-        },
-        "target": {
-          "id": "534bcf3e-9d65-454f-9738-1867135f423a"
-        },
-        "z": 4
-      },
-      "4bfec67f-7183-497c-b9df-09515b9110da": {
-        "size": {
-          "width": 60,
-          "height": 60
-        },
-        "position": {
-          "x": -710,
-          "y": -40
-        },
-        "z": 0,
+          "f3e12dae-10f9-4568-9071-ce928a025906"
+        ],
         "isassociatedwith": [
-          "061fe939-6a7b-4a4e-9852-9d499d17bcea"
+          "0f63267e-d82b-4937-b049-40823fdea465"
         ]
-      },
-      "9ef4e6b2-7c05-4be7-a167-a507d147684b": {
-        "source": {
-          "id": "4bfec67f-7183-497c-b9df-09515b9110da"
-        },
-        "target": {
-          "id": "061fe939-6a7b-4a4e-9852-9d499d17bcea"
-        },
-        "z": 3
       }
     }
   }
