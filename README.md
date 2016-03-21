@@ -18,9 +18,12 @@ A single cloud formation template containing the described features stored in a 
     }
   },
   </code>
-<h3>The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup</h3>
+###The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup
 <code>
-          "WebServerGroup": {
+      
+     
+
+         "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": {
@@ -34,15 +37,17 @@ A single cloud formation template containing the described features stored in a 
         "DesiredCapacity": "3",
         "LoadBalancerNames": [{
           "Ref": "ElasticLoadBalancer"
+        }],
+        "Tags": [{
+          "Key": "MyTag",
+          "Value": "joseph_test",
+          "PropagateAtLaunch": "true"
         }]
       },
-      "CreationPolicy": {
-        "ResourceSignal": {
-          "Timeout": "PT5M",
-          "Count": "3"
-        }
-      },
+</code>
 <h3>The stack should maintain 3 instances running at any given time</h3>. 
+<code>
+
       "UpdatePolicy": {
         "AutoScalingRollingUpdate": {
           "MinInstancesInService": "3",
@@ -57,7 +62,8 @@ A single cloud formation template containing the described features stored in a 
 
 <h3>The ec2 instances should be configured with a security group that only allows the website traffic and ssh	</h3>
 <code>
-"WebServerSecurityGroup": {
+
+      "WebServerSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Enable HTTP access via port 80 locked down to the ELB and SSH access",
@@ -84,16 +90,13 @@ A single cloud formation template containing the described features stored in a 
           "CidrIp": "0.0.0.0/0"
         }]
       },
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "914d06dc-c71a-4470-bb25-b9e6763dc6db"
-        }
-      }
+ 
     },
 </code>
 <h3>The ec2 instances should be configured with apache listening on port 8080.</h3> 
 <code>
-"LaunchConfig": {
+
+     "LaunchConfig": {
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Metadata": {
         "Comment1": "Configure the bootstrap helpers to install the Apache Web Server and PHP",
@@ -110,6 +113,7 @@ A single cloud formation template containing the described features stored in a 
                 </code>
 <h3>The webserver must display “Hello World” when the website is accessed on the ec2 instance</h3>
 <code>
+            
             "files": {
               "/var/www/html/index.php": {
                 "content": {
