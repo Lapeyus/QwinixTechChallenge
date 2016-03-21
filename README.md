@@ -20,7 +20,7 @@ A single cloud formation template containing the described features stored in a 
   </code>
 <h3>The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup</h3>
 <code>
-"WebServerGroup": {
+          "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": {
@@ -130,7 +130,8 @@ A single cloud formation template containing the described features stored in a 
 </code>
 <h3>The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80.</h3>
 <code>
-    "ElasticLoadBalancer": {
+
+      "ElasticLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties": {
         "CrossZone": "true",
@@ -153,7 +154,8 @@ A single cloud formation template containing the described features stored in a 
 
 ##Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
 <code>
-"CPUAlarmHigh": {
+
+     "CPUAlarmHigh": {
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmDescription": "Scale-up if CPU > 80% for 10 minutes",
@@ -181,13 +183,13 @@ A single cloud formation template containing the described features stored in a 
 </code>
 ##Each ec2 instance must be tagged with name equaling yourname_test. For example tag key name would equal steve_test in my case. 
 <code>
+
     "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": {
           "Fn::GetAZs": ""
         },
-
         "LaunchConfigurationName": {
           "Ref": "LaunchConfig"
         },
