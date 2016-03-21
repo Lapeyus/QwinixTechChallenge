@@ -9,22 +9,20 @@ A single cloud formation template containing the described features stored in a 
 <code>
 
     "Parameters": {
-    "InstanceType": {
+     "InstanceType": {
       "Description": "EC2 instance type",
       "Type": "String",
       "Default": "t1.micro",
       "AllowedValues": [        "t1.micro",        "t2.micro",        "m1.small",        "m1.medium",        "m1.large",
         "m3.medium",        "m3.large",        "m3.xlarge",        "m3.2xlarge",        "c1.medium",        "r3.large"],
       "ConstraintDescription": "must be a valid EC2 instance type."
-    }
-  },
+     }
+    },
   </code>
 ###The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup
 <code>
-      
-     
 
-         "WebServerGroup": {
+       "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
         "AvailabilityZones": {
@@ -111,7 +109,7 @@ A single cloud formation template containing the described features stored in a 
                 "php-mysql": []
               }
             },
-                </code>
+</code>
 ###The webserver must display “Hello World” when the website is accessed on the ec2 instance 
 <code>
 
