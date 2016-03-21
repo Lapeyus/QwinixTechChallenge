@@ -208,3 +208,19 @@ A single cloud formation template containing the described features stored in a 
           "PropagateAtLaunch": "true"
         }]
 </code>
+###S3 bucket and instances should have a policy that allows putting and getting objects from that bucket (public s3)
+<code>
+
+    S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "PublicRead"
+      },
+      "BucketName": "CloudFormateds3",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "619135e8-68f4-4236-a590-4ac50b07d936"
+        }
+      }
+    }
+</code>
