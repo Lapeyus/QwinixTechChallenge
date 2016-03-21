@@ -151,7 +151,7 @@ A single cloud formation template containing the described features stored in a 
         }],
 </code>
 
-#Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
+##Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
 <code>
 "CPUAlarmHigh": {
       "Type": "AWS::CloudWatch::Alarm",
@@ -178,4 +178,28 @@ A single cloud formation template containing the described features stored in a 
         ],
         "ComparisonOperator": "GreaterThanThreshold"
       },
+</code>
+##Each ec2 instance must be tagged with name equaling yourname_test. For example tag key name would equal steve_test in my case. 
+<code>
+    "WebServerGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AvailabilityZones": {
+          "Fn::GetAZs": ""
+        },
+
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "MinSize": "3",
+        "MaxSize": "4",
+        "DesiredCapacity": "3",
+        "LoadBalancerNames": [{
+          "Ref": "ElasticLoadBalancer"
+        }],
+        "Tags": [{
+          "Key": "MyTag",
+          "Value": "joseph_test",
+          "PropagateAtLaunch": "true"
+        }]
 </code>
