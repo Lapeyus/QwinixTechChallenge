@@ -7,7 +7,8 @@ A single cloud formation template containing the described features stored in a 
 <p>This challenge requires you to write a Cloudformation template that can be used to provision AWS services using automation. If you are not familiar with Cloudformation, you can search the Internet where there is a lot of information available from AWS about it. The CloudFormation template should be made available for review on github with full history of changes and commits using the master branch.</p>
 
 <code>
- "Parameters": {
+
+    "Parameters": {
     "InstanceType": {
       "Description": "EC2 instance type",
       "Type": "String",
@@ -45,7 +46,7 @@ A single cloud formation template containing the described features stored in a 
         }]
       },
 </code>
-<h3>The stack should maintain 3 instances running at any given time</h3>. 
+###The stack should maintain 3 instances running at any given time 
 <code>
 
       "UpdatePolicy": {
@@ -60,7 +61,7 @@ A single cloud formation template containing the described features stored in a 
     },
   </code>
 
-<h3>The ec2 instances should be configured with a security group that only allows the website traffic and ssh	</h3>
+###The ec2 instances should be configured with a security group that only allows the website traffic and ssh 
 <code>
 
       "WebServerSecurityGroup": {
@@ -93,7 +94,7 @@ A single cloud formation template containing the described features stored in a 
  
     },
 </code>
-<h3>The ec2 instances should be configured with apache listening on port 8080.</h3> 
+###The ec2 instances should be configured with apache listening on port 8080 
 <code>
 
      "LaunchConfig": {
@@ -111,10 +112,10 @@ A single cloud formation template containing the described features stored in a 
               }
             },
                 </code>
-<h3>The webserver must display “Hello World” when the website is accessed on the ec2 instance</h3>
+###The webserver must display “Hello World” when the website is accessed on the ec2 instance 
 <code>
-            
-            "files": {
+
+               "files": {
               "/var/www/html/index.php": {
                 "content": {
                   "Fn::Join": [
@@ -132,7 +133,7 @@ A single cloud formation template containing the described features stored in a 
                   ]
                 },
 </code>
-<h3>The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80.</h3>
+###The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80. 
 <code>
 
       "ElasticLoadBalancer": {
@@ -156,7 +157,7 @@ A single cloud formation template containing the described features stored in a 
         }],
 </code>
 
-##Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
+###Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
 <code>
 
      "CPUAlarmHigh": {
@@ -185,7 +186,7 @@ A single cloud formation template containing the described features stored in a 
         "ComparisonOperator": "GreaterThanThreshold"
       },
 </code>
-##Each ec2 instance must be tagged with name equaling yourname_test. For example tag key name would equal steve_test in my case. 
+###Each ec2 instance must be tagged with name equaling yourname_test. For example tag key name would equal steve_test in my case. 
 <code>
 
     "WebServerGroup": {
