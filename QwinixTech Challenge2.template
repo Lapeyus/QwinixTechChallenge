@@ -2,7 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Qwinix Tech Challenge",
   "Parameters": {
-
     "InstanceType": {
       "Description": "EC2 instance type",
       "Type": "String",
@@ -188,6 +187,11 @@
         "DesiredCapacity": "3",
         "LoadBalancerNames": [{
           "Ref": "ElasticLoadBalancer"
+        }],
+        "Tags": [{
+          "Key": "MyTag",
+          "Value": "joseph_test",
+          "PropagateAtLaunch": "true"
         }]
       },
       "CreationPolicy": {
@@ -235,7 +239,7 @@
                       "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n",
                       "  </head>\n",
                       "  <body>\n",
-                      "    <h1>Hello world?</h1>\n",
+                      "    <h1>Hello world</h1>\n",
                       "  </body>\n",
                       "</html>\n"
                     ]
@@ -469,6 +473,61 @@
           "id": "9cddbb54-0bb3-4f46-848c-6737907fad75"
         }
       }
+    },
+    "WebServerScaleUpPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "WebServerGroup"
+        },
+        "Cooldown": "60",
+        "ScalingAdjustment": "1"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "f537b5a1-831e-459e-a3dc-3f747ae4dbdc"
+        }
+      }
+    },
+    "CPUAlarmHigh": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Scale-up if CPU > 90% for 10 minutes",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "300",
+        "EvaluationPeriods": "2",
+        "Threshold": "80",
+        "AlarmActions": [{
+          "Ref": "WebServerScaleUpPolicy"
+        }],
+        "Dimensions": [{
+          "Name": "AutoScalingGroupName",
+          "Value": {
+            "Ref": "WebServerGroup"
+          }
+        }],
+        "ComparisonOperator": "GreaterThanThreshold"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5a5ef7ba-547f-46db-998a-11c450aeeb03"
+        }
+      }
+    },
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "PublicRead"
+      },
+      "BucketName": "CloudFormateds3",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "619135e8-68f4-4236-a590-4ac50b07d936"
+        }
+      }
     }
   },
   "Outputs": {
@@ -496,8 +555,8 @@
           "height": 60
         },
         "position": {
-          "x": 160,
-          "y": 200
+          "x": 180,
+          "y": 270
         },
         "z": 1,
         "embeds": []
@@ -508,8 +567,8 @@
           "height": 60
         },
         "position": {
-          "x": 10,
-          "y": 160
+          "x": 80,
+          "y": 180
         },
         "z": 1,
         "embeds": [],
@@ -523,8 +582,8 @@
           "height": 60
         },
         "position": {
-          "x": -110,
-          "y": 200
+          "x": 30,
+          "y": 270
         },
         "z": 1,
         "embeds": [],
@@ -538,8 +597,8 @@
           "height": 60
         },
         "position": {
-          "x": -170,
-          "y": 120
+          "x": 150,
+          "y": 70
         },
         "z": 1,
         "embeds": [],
@@ -553,8 +612,8 @@
           "height": 60
         },
         "position": {
-          "x": -240,
-          "y": 200
+          "x": -80,
+          "y": 90
         },
         "z": 1,
         "embeds": [],
@@ -571,8 +630,8 @@
           "height": 60
         },
         "position": {
-          "x": 370,
-          "y": 130
+          "x": 260,
+          "y": 50
         },
         "z": 1,
         "embeds": [],
@@ -586,8 +645,8 @@
           "height": 60
         },
         "position": {
-          "x": 280,
-          "y": 200
+          "x": 360,
+          "y": 90
         },
         "z": 1,
         "embeds": [],
@@ -597,6 +656,58 @@
         "isassociatedwith": [
           "0f63267e-d82b-4937-b049-40823fdea465"
         ]
+      },
+      "f537b5a1-831e-459e-a3dc-3f747ae4dbdc": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 360,
+          "y": 270
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "b0f32149-1c22-4a1a-8050-1afa73f4d2b4"
+        ]
+      },
+      "5a5ef7ba-547f-46db-998a-11c450aeeb03": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 450,
+          "y": 170
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "f537b5a1-831e-459e-a3dc-3f747ae4dbdc",
+          "b0f32149-1c22-4a1a-8050-1afa73f4d2b4"
+        ]
+      },
+      "619135e8-68f4-4236-a590-4ac50b07d936": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": -220,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "222a4cbf-e0d8-46b9-b138-43c7ba1e6f0e": {
+        "source": {
+          "id": "58fd41f7-687b-4dc9-b813-e8cb233cfd0a"
+        },
+        "target": {
+          "id": "619135e8-68f4-4236-a590-4ac50b07d936"
+        },
+        "z": 2
       }
     }
   }
