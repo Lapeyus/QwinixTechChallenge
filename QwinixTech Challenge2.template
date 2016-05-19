@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Qwinix Tech Challenge",
+  "Description": "Qwinix Tech Challenge: Joseph Villarreal",
   "Parameters": {
     "InstanceType": {
       "Description": "EC2 instance type",
