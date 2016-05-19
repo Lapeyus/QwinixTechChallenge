@@ -19,7 +19,7 @@
         "c1.medium",
         "r3.large"
       ],
-      "ConstraintDescription": "must be a valid EC2 instance type."
+      "ConstraintDescription": "Must be a valid EC2 instance type."
     }
   },
   "Mappings": {
