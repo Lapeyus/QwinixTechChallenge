@@ -3,7 +3,7 @@
   "Description": "Qwinix Tech Challenge review: Joseph Villarreal Lopez",
   "Parameters": {
     "InstanceType": {
-      "Description": "Allowed EC2 instance type",
+      "Description": "Allowed EC2 instance types",
       "Type": "String",
       "Default": "t1.micro",
       "AllowedValues": [
