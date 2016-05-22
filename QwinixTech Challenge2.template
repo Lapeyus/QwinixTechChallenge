@@ -532,7 +532,7 @@
   },
   "Outputs": {
     "WebsiteURL": {
-      "Description": "URL for newly created LAMP stack",
+      "Description": "URL for newly created LAMP stacker",
       "Value": {
         "Fn::Join": [
           "", [
