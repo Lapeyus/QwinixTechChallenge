@@ -19,7 +19,7 @@
         "c1.medium",
         "r3.large"
       ],
-      "ConstraintDescription": "Must be a valid EC2 instance type."
+      "ConstraintDescription": "Must be a valid EC2 instance type"
     }
   },
   "Mappings": {
@@ -190,7 +190,7 @@
         }],
         "Tags": [{
           "Key": "MyTag",
-          "Value": "joseph_test",
+          "Value": "joseph_tesat",
           "PropagateAtLaunch": "true"
         }]
       },
