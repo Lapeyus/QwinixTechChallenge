@@ -1,4 +1,4 @@
-#Challenge - Infrastructure as Code
+#Challenge-Infrastructure as Code
 
 ##Deliverable:
 A single cloud formation template containing the described features stored in a github repository.  
