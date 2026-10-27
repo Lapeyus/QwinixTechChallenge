@@ -1,226 +1,125 @@
-#Challenge-Infrastructure as Code
+# QwinixTechChallenge
 
-##Deliverable:
-A single cloud formation template containing the described features stored in a github repository.  
+> **Archived (2016).** A technical-challenge infrastructure-as-code exercise kept for reference only. It is not
+> maintained and should not be deployed as-is: it targets EC2-Classic, legacy instance types and AMI IDs from 2016.
 
-<h2>Description:</h2>
-<p>This challenge requires you to write a Cloudformation template that can be used to provision AWS services using automation. If you are not familiar with Cloudformation, you can search the Internet where there is a lot of information available from AWS about it. The CloudFormation template should be made available for review on github with full history of changes and commits using the master branch.</p>
+An AWS CloudFormation template that provisions a load-balanced, auto-scaled Apache/PHP web tier with a MySQL RDS
+database and an S3 bucket.
 
-<code>
+## Description
 
-    "Parameters": {
-     "InstanceType": {
-      "Description": "EC2 instance type",
-      "Type": "String",
-      "Default": "t1.micro",
-      "AllowedValues": [        "t1.micro",        "t2.micro",        "m1.small",        "m1.medium",        "m1.large",
-        "m3.medium",        "m3.large",        "m3.xlarge",        "m3.2xlarge",        "c1.medium",        "r3.large"],
-      "ConstraintDescription": "must be a valid EC2 instance type."
-     }
-    },
-  </code>
-###The stack should initiate 3 EC2 instances accomplished using AutoScalingGroup
-<code>
+In March 2016 the Qwinix tech challenge asked for a single CloudFormation template, with its full
+commit history on GitHub, that builds a small highly available web stack. This repository is that submission: the
+template plus a README that walked the reviewer through each requirement with the matching template snippet.
 
-       "WebServerGroup": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-      "Properties": {
-        "AvailabilityZones": {
-          "Fn::GetAZs": ""
-        },
-        "LaunchConfigurationName": {
-          "Ref": "LaunchConfig"
-        },
-        "MinSize": "3",
-        "MaxSize": "4",
-        "DesiredCapacity": "3",
-        "LoadBalancerNames": [{
-          "Ref": "ElasticLoadBalancer"
-        }],
-        "Tags": [{
-          "Key": "MyTag",
-          "Value": "joseph_test",
-          "PropagateAtLaunch": "true"
-        }]
-      },
-</code>
-###The stack should maintain 3 instances running at any given time 
-<code>
+It may still be of interest as an example of a pre-VPC-default CloudFormation (JSON, `cfn-init` / `cfn-hup`)
+web stack.
 
-      "UpdatePolicy": {
-        "AutoScalingRollingUpdate": {
-          "MinInstancesInService": "3",
-          "MaxBatchSize": "1",
-          "PauseTime": "PT15M",
-          "WaitOnResourceSignals": "true"
-        }
-      },
-      }
-    },
-  </code>
+## Features
 
-###The ec2 instances should be configured with a security group that only allows the website traffic and ssh 
-<code>
+Resources in `QwinixTech Challenge2.template`:
 
-      "WebServerSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enable HTTP access via port 80 locked down to the ELB and SSH access",
-        "SecurityGroupIngress": [{
-          "IpProtocol": "tcp",
-          "FromPort": "80",
-          "ToPort": "80",
-          "SourceSecurityGroupOwnerId": {
-            "Fn::GetAtt": [
-              "ElasticLoadBalancer",
-              "SourceSecurityGroup.OwnerAlias"
-            ]
-          },
-          "SourceSecurityGroupName": {
-            "Fn::GetAtt": [
-              "ElasticLoadBalancer",
-              "SourceSecurityGroup.GroupName"
-            ]
-          }
-        }, {
-          "IpProtocol": "tcp",
-          "FromPort": "22",
-          "ToPort": "22",
-          "CidrIp": "0.0.0.0/0"
-        }]
-      },
- 
-    },
-</code>
-###The ec2 instances should be configured with apache listening on port 8080 
-<code>
+- **Elastic Load Balancer (Classic)**: HTTP listener on port 80, cross-zone, cookie stickiness, health check on
+  `HTTP:80/`.
+- **Auto Scaling group**: min 3, desired 3, max 4 instances across all AZs of the region, rolling updates keeping 3
+  in service; instances tagged `MyTag = joseph_test`.
+- **Launch configuration**: Amazon Linux AMI looked up per region and architecture; `cfn-init` installs `httpd`,
+  `php` and `php-mysql`, writes a "Hello world" `index.php`, and enables `httpd` and `cfn-hup`; `cfn-signal` reports
+  back to the stack.
+- **Security groups**: web servers accept port 80 only from the ELB and SSH from anywhere; the database accepts 3306
+  only from the web servers (VPC or EC2-Classic variant chosen by a region condition).
+- **RDS MySQL**: `db.t2.small`, Multi-AZ, 5 GB.
+- **Scale-up policy + CloudWatch alarm**: add one instance when average CPU is above 80% for two 5-minute periods.
+- **S3 bucket** with `PublicRead` ACL.
+- **Output** `WebsiteURL`: `http://` plus the ELB DNS name.
 
-     "LaunchConfig": {
-      "Type": "AWS::AutoScaling::LaunchConfiguration",
-      "Metadata": {
-        "Comment1": "Configure the bootstrap helpers to install the Apache Web Server and PHP",
-        "Comment2": "The website content is created",
-        "AWS::CloudFormation::Init": {
-          "config": {
-            "packages": {
-              "yum": {
-                "httpd": [],
-                "php": [],
-                "php-mysql": []
-              }
-            },
-</code>
-###The webserver must display “Hello World” when the website is accessed on the ec2 instance 
-<code>
+## Architecture
 
-               "files": {
-              "/var/www/html/index.php": {
-                "content": {
-                  "Fn::Join": [
-                    "", [
-                      "<html>\n",
-                      "  <head>\n",
-                      "    <title>Qwinix Tech Challenge</title>\n",
-                      "    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n",
-                      "  </head>\n",
-                      "  <body>\n",
-                      "    <h1>Hello world?</h1>\n",
-                      "  </body>\n",
-                      "</html>\n"
-                    ]
-                  ]
-                },
-</code>
-###The only way to reach the apache on the instances is via an ELB that the stack also creates sending traffic from a public subnet, listening on port 80. 
-<code>
+```mermaid
+flowchart LR
+    user["Browser"] -->|HTTP :80| elb["Classic ELB"]
+    subgraph asg["Auto Scaling group (3-4 instances)"]
+        ec2a["EC2: Apache + PHP"]
+        ec2b["EC2: Apache + PHP"]
+        ec2c["EC2: Apache + PHP"]
+    end
+    elb -->|:80| ec2a & ec2b & ec2c
+    ec2a & ec2b & ec2c -->|:3306| rds[("RDS MySQL<br/>Multi-AZ")]
+    cw["CloudWatch alarm<br/>CPU > 80%"] -->|scale up +1| asg
+    s3[("S3 bucket<br/>PublicRead")]
+```
 
-      "ElasticLoadBalancer": {
-      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties": {
-        "CrossZone": "true",
-        "AvailabilityZones": {
-          "Fn::GetAZs": ""
-        },
-        "LBCookieStickinessPolicy": [{
-          "PolicyName": "CookieBasedPolicy",
-          "CookieExpirationPeriod": "30"
-        }],
-        "Listeners": [{
-          "LoadBalancerPort": "80",
-          "InstancePort": "80",
-          "Protocol": "HTTP",
-          "PolicyNames": [
-            "CookieBasedPolicy"
-          ]
-        }],
-</code>
+## Requirements vs. implementation
 
-###Enable the autoscaling policy to scale up 1 server at a time based on a cpu alarm trigger of 80%
-<code>
+The challenge requirements, and how the template meets them:
 
-     "CPUAlarmHigh": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "AlarmDescription": "Scale-up if CPU > 80% for 10 minutes",
-        "MetricName": "CPUUtilization",
-        "Namespace": "AWS/EC2",
-        "Statistic": "Average",
-        "Period": "300",
-        "EvaluationPeriods": "2",
-        "Threshold": "80",
-        "AlarmActions": [
-          {
-            "Ref": "WebServerScaleUpPolicy"
-          }
-        ],
-        "Dimensions": [
-          {
-            "Name": "AutoScalingGroupName",
-            "Value": {
-              "Ref": "WebServerGroup"
-            }
-          }
-        ],
-        "ComparisonOperator": "GreaterThanThreshold"
-      },
-</code>
-###Each ec2 instance must be tagged with name equaling yourname_test. For example tag key name would equal steve_test in my case. 
-<code>
+| Requirement | Status |
+|---|---|
+| `InstanceType` parameter with allowed values | Done (default `t1.micro`) |
+| 3 EC2 instances via an Auto Scaling group | Done |
+| Keep 3 instances running at all times | Done (min size 3, rolling update keeps 3 in service) |
+| Security group allowing only web traffic and SSH | Done (80 from ELB, 22 from `0.0.0.0/0`) |
+| Apache listening on port **8080** | **Not met**: Apache uses its default port 80 |
+| Web page shows "Hello World" | Done (page reads "Hello world?") |
+| Apache reachable only via an ELB on port 80 from a public subnet | Partly: ELB on 80, but no VPC/subnets are defined; relies on the default network |
+| Scale up one server at a time on 80% CPU | Done |
+| Instances tagged `yourname_test` | Partly: tag *value* is `joseph_test`, tag *key* is `MyTag` rather than `Name` |
+| S3 bucket and instance policy for put/get | Partly: bucket is `PublicRead`; no bucket policy or instance role grants put |
 
-    "WebServerGroup": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-      "Properties": {
-        "AvailabilityZones": {
-          "Fn::GetAZs": ""
-        },
-        "LaunchConfigurationName": {
-          "Ref": "LaunchConfig"
-        },
-        "MinSize": "3",
-        "MaxSize": "4",
-        "DesiredCapacity": "3",
-        "LoadBalancerNames": [{
-          "Ref": "ElasticLoadBalancer"
-        }],
-        "Tags": [{
-          "Key": "MyTag",
-          "Value": "joseph_test",
-          "PropagateAtLaunch": "true"
-        }]
-</code>
-###S3 bucket and instances should have a policy that allows putting and getting objects from that bucket (public s3)
-<code>
+## Requirements
 
-    S3Bucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "AccessControl": "PublicRead"
-      },
-      "BucketName": "CloudFormateds3",
-      "Metadata": {
-        "AWS::CloudFormation::Designer": {
-          "id": "619135e8-68f4-4236-a590-4ac50b07d936"
-        }
-      }
-    }
-</code>
+- An AWS account and the AWS CLI (or the CloudFormation console).
+- Historical note: the AMI map only covers ten 2016-era regions and EC2-Classic, which AWS retired in 2022, so
+  creation is expected to fail in a modern account without updating the mappings, instance types and networking.
+
+## Installation and quick start
+
+For reference, this is how the stack was meant to be created:
+
+```bash
+aws cloudformation validate-template \
+  --template-body "file://QwinixTech Challenge2.template"
+
+aws cloudformation create-stack \
+  --stack-name qwinix-challenge \
+  --template-body "file://QwinixTech Challenge2.template" \
+  --parameters ParameterKey=InstanceType,ParameterValue=t2.micro
+```
+
+When the stack completes, open the `WebsiteURL` output.
+
+## Repository structure
+
+```
+.
+├── QwinixTech Challenge2.template  # the CloudFormation template (JSON, format 2010-09-09)
+├── README.md
+├── LICENSE                         # GPL-3.0
+└── .gitignore                      # ignores *.swp
+```
+
+## Configuration
+
+One stack parameter: `InstanceType`. Everything else (database name, user and password, instance counts, alarm
+thresholds) is hardcoded in the template.
+
+## Tests
+
+There are no automated tests. The template parses as valid JSON (checked in 2026); it was not re-deployed.
+
+## Project status
+
+**Archived.** Commits run from 2016-03-16 to 2016-05-23 and the repository has not changed since, apart from this
+README.
+
+Known limitations, beyond the unmet requirements above:
+
+- Placeholder database credentials are written in plain text in the template instead of being `NoEcho` parameters.
+- SSH is open to the whole internet.
+- The S3 bucket is publicly readable.
+- No VPC, subnets or IAM roles are created.
+- `t1.micro`, `m1.*`, `c1.*` instance types and the hardcoded AMI IDs are obsolete.
+
+## License
+
+GNU General Public License v3.0. See [LICENSE](LICENSE).
